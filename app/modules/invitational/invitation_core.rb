@@ -12,35 +12,35 @@ module Invitational
       validates :invitable,  :presence => true, :if => :standard_role?
 
       scope :uberadmin, lambda {
-        where("invitable_id IS NULL AND role = 'uberadmin'")
+        where(invitable_id: nil, role: :uberadmin)
       }
 
       scope :for_email, lambda {|email|
-        where('email = ?', email)
+        where(email: email)
       }
 
       scope :pending_for, lambda {|email|
-        where('email = ? AND user_id IS NULL', email)
+        where(email: email, user_id: nil)
       }
 
       scope :for_claim_hash, lambda {|claim_hash|
-        where('claim_hash = ?', claim_hash)
+        where(claim_hash: claim_hash)
       }
 
       scope :for_invitable, lambda {|type, id|
-        where('invitable_type = ? AND invitable_id = ?', type, id)
+        where(invitable_type: type, invitable_id: id)
       }
 
       scope :by_role, lambda {|role|
-        where('role = ?', role.to_s)
+        where(role: role.to_s)
       }
 
       scope :for_system_role, lambda {|role|
-        where('invitable_id IS NULL AND role = ?', role.to_s)
+        where(invitable_id: nil, role: role.to_s)
       }
 
-      scope :pending, lambda { where('user_id IS NULL') }
-      scope :claimed, lambda { where('user_id IS NOT NULL') }
+      scope :pending, lambda { where(user_id: nil) }
+      scope :claimed, lambda { where.not(user_id: nil) }
 
       @system_roles = [:uberadmin]
 
@@ -70,7 +70,7 @@ module Invitational
         args.each do |role|
           relation = role.to_s.pluralize.to_sym
 
-          scope relation, -> {where("invitable_id IS NULL AND role = '#{role.to_s}'")}
+          scope relation, -> {where(invitable_id: nil, role: role.to_s)}
 
           self.system_roles << role
         end
